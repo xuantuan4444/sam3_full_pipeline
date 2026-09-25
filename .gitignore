@@ -1,0 +1,23 @@
+# Only full_pipeline/ is tracked -- everything else in sam3_paper/ (old notebooks, zips, .venv,
+# scratch folders) stays local.
+/*
+!/.gitignore
+!/full_pipeline/
+
+# Never commit data, weights, pipeline outputs or caches
+full_pipeline/*/data/
+full_pipeline/*/weights/
+full_pipeline/*/outputs/
+full_pipeline/*/outputs_smoke/
+full_pipeline/*/outputs*/
+*.pt
+*.pth
+*.npz
+*.zip
+
+# Secrets / Python noise
+.env
+*.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

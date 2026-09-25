@@ -1,0 +1,140 @@
+{
+  "tvmonitor": {
+    "definition": "A television or computer monitor. A standalone screen used for displaying video or computer output. Does not include the keyboard, mouse, or the stand/table it sits on.",
+    "anchor_prompts": [
+      "monitor",
+      "television"
+    ],
+    "positive": [
+      "computer screen",
+      "flat screen",
+      "tv screen"
+    ],
+    "negative": [
+      "laptop",
+      "billboard",
+      "projector screen",
+      "tablet",
+      "smartphone"
+    ],
+    "confusable_classes": [
+      "laptop"
+    ]
+  },
+  "chair": {
+    "definition": "A piece of furniture designed for ONE person to sit on, typically with a back and legs, and NOT covered head-to-toe in thick soft upholstery. Chairs and sofas are frequently confused with each other -- an 'armchair' in particular visually overlaps with a small sofa.",
+    "anchor_prompts": [
+      "chair"
+    ],
+    "positive": [
+      "office chair",
+      "dining chair",
+      "chair with backrest"
+    ],
+    "negative": [
+      "sofa",
+      "couch",
+      "armchair",
+      "bench",
+      "stool (if lacking a back)"
+    ],
+    "confusable_classes": [
+      "sofa",
+      "bench"
+    ],
+    "generation_notes": "Do NOT drop the bare word 'chair' -- it is a common, strongly-represented term and must remain in the output. Do NOT use 'armchair' or other cushioned/upholstered single-seat descriptors as prompts, since these overlap visually with sofa and increase chair/sofa confusion."
+  },
+  "bicycle": {
+    "definition": "A two-wheeled vehicle propelled by pedals. IMPORTANT ground-truth quirk: only the rim of the wheels and the frame are masked; the solid disc/spoke area inside each wheel is NOT masked (it is treated as background). Does not include the rider.",
+    "anchor_prompts": [
+      "bicycle"
+    ],
+    "positive": [
+      "bicycle frame",
+      "mountain bike",
+      "parked bicycle"
+    ],
+    "negative": [
+      "motorcycle",
+      "rider",
+      "solid wheel disc",
+      "tricycle"
+    ],
+    "confusable_classes": [
+      "motorcycle",
+      "rider"
+    ],
+    "generation_notes": "Avoid prompts that isolate the wheel alone (e.g. 'bicycle wheel', 'wheel rim') -- naming the wheel tends to make the segmenter mask the full solid wheel disc, which conflicts with the rim-only ground truth. Prefer whole-object or frame-oriented prompts instead. Note this is a known structural limitation of prompt-only tuning for this class -- do not expect it to be fully solved by wording alone."
+  },
+  "sofa": {
+    "definition": "A long, upholstered piece of furniture seating SEVERAL people at once -- noticeably longer than a single chair. Ground truth includes any pillows resting on it. Frequently confused with chair/armchair.",
+    "anchor_prompts": [
+      "sofa",
+      "couch"
+    ],
+    "positive": [
+      "long couch",
+      "multi-seat sofa",
+      "sofa with pillows"
+    ],
+    "negative": [
+      "chair",
+      "armchair",
+      "bed",
+      "bench"
+    ],
+    "confusable_classes": [
+      "chair",
+      "bed"
+    ],
+    "generation_notes": "Keep both 'sofa' and 'couch' verbatim -- they are strong, common terms. Avoid rarer synonyms like 'settee' or 'loveseat' (weaker in the text encoder's vocabulary) and avoid generic terms like 'upholstered furniture' (too broad -- it also matches chair/armchair). Emphasize multi-seat / length as the distinguishing trait versus chair."
+  },
+  "pottedplant": {
+    "definition": "A plant grown in a container or pot, or an empty plant pot. The mask must include both the plant itself (leaves, stem, flowers) and the pot/container it is planted in as a single object. If the pot is empty, the mask includes just the pot.",
+    "anchor_prompts": [
+      "potted plant",
+      "houseplant"
+    ],
+    "positive": [
+      "flower pot with plant",
+      "potted bush",
+      "indoor plant"
+    ],
+    "negative": [
+      "tree in the ground",
+      "grass",
+      "vase with cut flowers",
+      "wild vegetation",
+      "bucket (not intended for plants)"
+    ],
+    "confusable_classes": [
+      "vase",
+      "bucket"
+    ]
+  },
+  "diningtable": {
+    "definition": "A table SPECIFICALLY used for eating meals, typically in a dining room or kitchen, usually surrounded by chairs. For ground truth, the entire shape and boundary of the table is masked, even if objects lying on top (plates, cups) occlude parts of the surface.",
+    "anchor_prompts": [
+      "dining table"
+    ],
+    "positive": [
+      "dining room table"
+    ],
+    "negative": [
+      "coffee table",
+      "side table",
+      "console table",
+      "desk",
+      "kitchen counter",
+      "countertop",
+      "workbench",
+      "objects on the table (plates, cups)",
+      "tablecloth (if considered separate)"
+    ],
+    "confusable_classes": [
+      "desk",
+      "coffee table"
+    ],
+    "generation_notes": "This class over-segments badly when given broad/generic prompts ('large table', 'wooden table', 'kitchen table') -- these match many other table-like surfaces not annotated as diningtable in the ground truth, causing predicted area to greatly exceed ground-truth area. Prioritize PRECISION over recall: prefer 2 prompts (just the anchor plus one close variant) over the usual 2-4, all close variants of 'dining table' anchored to the eating-meal context. Do NOT include single-attribute descriptors (material, size, or room-generic terms) that lack an explicit meal-table context -- if a candidate prompt could equally describe a desk, coffee table, or kitchen counter, drop it."
+  }
+}

@@ -1,0 +1,19 @@
+# Install order (see full_pipeline/README.md):
+#   1. pip install torch torchvision            # the build matching the server's CUDA
+#   2. pip install 'git+https://github.com/facebookresearch/sam3.git' --no-deps
+#   3. pip install -r requirements.txt
+numpy>=1.26,<2
+iopath>=0.1.10
+ftfy==6.1.1
+portalocker
+pandas
+matplotlib
+pillow
+tqdm
+opencv-python-headless
+scipy
+albumentations>=2.0
+
+# tools/ only (not needed by the pipeline itself)
+# scikit-learn kneed          -> tools/select_refinement_classes.py
+# google-genai pydantic python-dotenv  -> tools/generate_adjust_prompt_*.py

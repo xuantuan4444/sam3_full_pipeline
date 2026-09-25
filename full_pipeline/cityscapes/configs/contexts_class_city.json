@@ -1,0 +1,320 @@
+{
+  "sidewalk": {
+    "definition": "Part of ground designated for pedestrians or cyclists. Delimited from the road by some obstacle, e.g. curbs or poles (might be small), not only by markings. Often elevated compared to the road. Often located at the sides of a road. This label includes a possibly delimiting curb, traffic islands (the walkable part), or pedestrian zones (where usually cars are not allowed to drive during day-time).",
+    "anchor_prompts": ["sidewalk"],
+    "positive": [
+      "paved pedestrian path",
+      "footway",
+      "walkway",
+      "traffic island walkable part",
+      "pedestrian zone",
+      "curb"
+    ],
+    "negative": [
+      "road",
+      "driving lane",
+      "terrain",
+      "grass",
+      "street"
+    ],
+    "confusable_classes": [
+      "road",
+      "terrain"
+    ],
+    "generation_notes": "Empirically confirmed to regress when the bare term 'sidewalk' was dropped in favor of generic path/walkway terms plus a thin boundary term ('curb'). Root causes: (1) the anchor was missing; (2) 'curb' names only a thin boundary strip, not the full walkable region, so it under-segments the class; (3) generic path/walkway terms also match paved areas in parks/plazas that are annotated as terrain/road, causing false positives. Keep 'sidewalk' as the anchor and add at most one additional prompt, only if it clearly discriminates against 'road' and 'terrain' without matching generic paved areas (e.g. 'footway'). Never add 'curb' as a standalone prompt."
+  },
+  "bus": {
+    "definition": "Bus for 9+ persons, public transport or long distance transport.",
+    "anchor_prompts": ["bus"],
+    "positive": [
+      "city bus",
+      "public transport bus",
+      "long distance coach",
+      "school bus",
+      "minibus (9+ persons)"
+    ],
+    "negative": [
+      "car",
+      "van (under 9 persons)",
+      "train",
+      "tram"
+    ],
+    "confusable_classes": [
+      "car",
+      "train",
+      "truck"
+    ],
+    "generation_notes": "Preventive anchor: the bare term 'bus' was previously dropped in favor of narrower sub-types (city bus, public coach, school bus, minibus) -- the same anchor-drop pattern confirmed to regress other classes in this dataset. No isolated evaluation yet for this specific class."
+  },
+  "vegetation": {
+    "definition": "Tree, hedge, all kinds of vertical vegetation. Plants attached to buildings are usually not annotated separately and labeled building as well. If growing at the side of a wall or building, marked as vegetation if it covers a substantial part of the surface (more than 20%)",
+    "positive": [
+      "tree",
+      "hedge",
+      "vertical vegetation",
+      "bush",
+      "shrub"
+    ],
+    "negative": [
+      "horizontal vegetation",
+      "grass",
+      "bare soil",
+      "building facade covered in ivy (under 20%)"
+    ],
+    "confusable_classes": [
+      "terrain",
+      "building"
+    ],
+    "generation_notes": "Empirically validated: decomposing into concrete visual nouns ('tree', 'hedge', 'bush', 'shrub') without the abstract bare term 'vegetation' improved results. Do not add 'vegetation' itself back as a prompt -- it is too abstract for reliable open-vocabulary matching."
+  },
+  "bicycle": {
+    "definition": "Bicycle without the driver (that's a rider, see above)",
+    "anchor_prompts": ["bicycle"],
+    "positive": [
+      "bicycle",
+      "bike",
+      "parked bicycle",
+      "unridden bicycle"
+    ],
+    "negative": [
+      "motorcycle",
+      "rider on bicycle",
+      "person next to bicycle"
+    ],
+    "confusable_classes": [
+      "motorcycle",
+      "rider"
+    ]
+  },
+  "motorcycle": {
+    "definition": "Motorbike, moped, scooter without the driver (that's a rider, see above)",
+    "anchor_prompts": ["motorcycle"],
+    "positive": [
+      "motorbike",
+      "moped",
+      "scooter",
+      "parked motorcycle",
+      "unridden motorcycle"
+    ],
+    "negative": [
+      "bicycle",
+      "rider on motorcycle",
+      "car"
+    ],
+    "confusable_classes": [
+      "bicycle",
+      "rider"
+    ],
+    "generation_notes": "Preventive anchor: the bare term 'motorcycle' was previously dropped in favor of narrower sub-types (motorbike, moped, scooter, parked motorcycle) -- the same anchor-drop pattern confirmed to regress other classes in this dataset. No isolated evaluation yet for this specific class."
+  },
+  "person": {
+    "definition": "A human that satisfies the following criterion. Assume the human moved a distance of 1m and stopped again. If the human would walk, the label is person, otherwise not. Examples are people walking, standing or sitting on the ground, on a bench, on a chair. This class also includes toddlers, someone pushing a bicycle or standing next to it with both legs on the same side of the bicycle. This class includes anything that is carried by the person, e.g. backpack, but not items touching the ground, e.g. trolleys.",
+    "positive": [
+      "pedestrian",
+      "person walking",
+      "person standing",
+      "person sitting",
+      "toddler",
+      "person pushing bicycle",
+      "carried backpack"
+    ],
+    "negative": [
+      "rider",
+      "person on bicycle",
+      "trolley",
+      "suitcase on wheels"
+    ],
+    "confusable_classes": [
+      "rider",
+      "bicycle"
+    ],
+    "generation_notes": "Preventive anchor: the bare term 'person' was previously dropped in favor of narrower sub-types (pedestrian, standing person, sitting person, toddler) -- the same anchor-drop pattern confirmed to regress other classes in this dataset. No isolated evaluation yet for this specific class."
+  },
+  "traffic sign": {
+    "definition": "Sign installed from the state/city authority, usually for information of the driver/cyclist/pedestrian in an everyday traffic scene, e.g. traffic- signs, parking signs, direction signs - without their poles. No ads/commercial signs. Only the front side of a sign containing the information. The back side is static. Note that commercial signs attached to buildings become building, attached to poles or standing on their own become static.",
+    "anchor_prompts": ["traffic sign"],
+    "positive": [
+      "speed limit sign (front side)",
+      "parking sign (front side)",
+      "direction sign (front side)",
+      "stop sign (front side)",
+      "warning sign (front side)"
+    ],
+    "negative": [
+      "sign pole",
+      "commercial sign",
+      "advertisement",
+      "back side of sign"
+    ],
+    "confusable_classes": [
+      "traffic light",
+      "pole",
+      "static"
+    ],
+    "generation_notes": "Confirmed to regress severely when the bare term 'traffic sign' was fully replaced by a small enumerated set of sub-types (speed/parking/stop/warning sign). Cityscapes 'traffic sign' covers many sign types beyond any small enumerated set (e.g. direction, informational, prohibition signs), so an exhaustive enumeration is impossible and any narrow subset causes major recall loss. Keep 'traffic sign' as the anchor; sub-type prompts may still be added as long as the anchor is never dropped."
+  },
+  "traffic light": {
+    "definition": "The traffic light box without its poles",
+    "anchor_prompts": ["traffic light"],
+    "positive": [
+      "traffic light box",
+      "traffic signal casing",
+      "red light",
+      "green light",
+      "pedestrian crossing signal"
+    ],
+    "negative": [
+      "traffic light pole",
+      "street light",
+      "traffic sign"
+    ],
+    "confusable_classes": [
+      "traffic sign",
+      "pole"
+    ],
+    "generation_notes": "Preventive anchor: the bare term 'traffic light' was previously dropped in favor of narrower sub-types (traffic signal, signal box, crossing signal) -- the same anchor-drop pattern confirmed to regress other classes in this dataset. No isolated evaluation yet for this specific class."
+  },
+  "pole": {
+    "definition": "Small mainly vertically oriented pole. E.g. sign pole, traffic light poles. If the pole has a horizontal part (often for traffic light poles) this part is also considered pole. If there are things mounted at the pole that are neither traffic light nor traffic sign (e.g. street lights) and that have a diameter (in pixels) of at most twice the diameter of the pole, then these things might also be labeled pole. If they are larger, they are labeled static.",
+    "anchor_prompts": ["pole"],
+    "positive": [
+      "sign pole",
+      "traffic light pole",
+      "street light pole",
+      "vertically oriented pole",
+      "horizontal part of traffic light pole"
+    ],
+    "negative": [
+      "large static object",
+      "traffic sign",
+      "traffic light",
+      "tree trunk",
+      "building pillar"
+    ],
+    "confusable_classes": [
+      "traffic sign",
+      "traffic light",
+      "static",
+      "tree trunk"
+    ],
+    "generation_notes": "Confirmed to regress when the bare term 'pole' was replaced entirely by mounted-object sub-types (sign pole, light pole, metal post, utility pole). Many real poles are bare or support objects outside any enumerated set, so full decomposition causes recall loss. Keep 'pole' as the anchor and add at most one additional discriminative term against confusable classes (traffic sign, traffic light, static, tree trunk); do not attempt to enumerate every mounted-object type."
+  },
+  "fence": {
+    "definition": "Fence including any holes.",
+    "anchor_prompts": ["fence"],
+    "positive": [
+      "chain link fence",
+      "wooden fence",
+      "metal fence",
+      "picket fence",
+      "barrier"
+    ],
+    "negative": [
+      "wall",
+      "building",
+      "guard rail",
+      "hedge"
+    ],
+    "confusable_classes": [
+      "wall",
+      "guard rail"
+    ],
+    "generation_notes": "Preventive anchor: same anchor-drop pattern observed elsewhere in this dataset, plus the same material-bias risk confirmed for 'wall'. Avoid parallel material-typed prompts such as 'wooden fence'/'metal fence'/'picket fence'; a structural term like 'chain-link fence' is acceptable if needed, keeping the total prompt count low."
+  },
+  "wall": {
+    "definition": "Individual standing wall. Not part of a building.",
+    "anchor_prompts": ["wall"],
+    "positive": [
+      "standalone wall",
+      "individual standing wall",
+      "brick wall",
+      "stone wall",
+      "concrete wall"
+    ],
+    "negative": [
+      "building wall",
+      "house wall",
+      "facade",
+      "fence",
+      "retaining wall attached to building"
+    ],
+    "confusable_classes": [
+      "building",
+      "fence"
+    ],
+    "generation_notes": "Confirmed to regress when the bare term 'wall' was replaced by material-typed sub-types (brick/stone/concrete wall). Material/texture adjectives bias open-vocabulary text encoders toward that specific visual texture, causing recall loss on walls of other materials (stucco, rendered, painted, corrugated, etc.). Keep 'wall' as the anchor and use only a structural/positional discriminator against the confusable 'building' class (e.g. 'standalone wall' or 'freestanding wall'), never a material adjective."
+  },
+  "train": {
+    "definition": "Vehicle on rails",
+    "anchor_prompts": ["train"],
+    "positive": [
+      "passenger train",
+      "freight train",
+      "tram",
+      "subway train",
+      "streetcar"
+    ],
+    "negative": [
+      "bus",
+      "car",
+      "truck"
+    ],
+    "confusable_classes": [
+      "bus",
+      "car"
+    ],
+    "generation_notes": "Preventive anchor: the bare term 'train' was previously dropped in favor of narrower sub-types (passenger train, freight train, subway train, tram) -- the same anchor-drop pattern confirmed to regress other classes in this dataset. No isolated evaluation yet for this specific class."
+  },
+  "rider": {
+    "definition": "A human that would use some device to move a distance of 1m. Includes, riders/drivers of bicycle, motorbike, scooter, skateboards, horses, roller-blades, wheel-chairs, road cleaning cars, cars without roof. Note that a visible driver of a car with roof can only be seen through the window. Since holes are not labeled, the human is included in the car label.",
+    "positive": [
+      "bicyclist",
+      "motorcyclist",
+      "scooter rider",
+      "skateboarder",
+      "person on horse",
+      "person on roller-blades",
+      "wheel-chair user",
+      "driver in car without roof"
+    ],
+    "negative": [
+      "person walking",
+      "driver in car with roof",
+      "pedestrian",
+      "person sitting on bench"
+    ],
+    "confusable_classes": [
+      "person",
+      "bicycle",
+      "motorcycle",
+      "car"
+    ],
+    "generation_notes": "Empirically validated: decomposing into concrete role-specific nouns ('bicyclist', 'motorcyclist', 'scooter rider', 'skateboarder') without the abstract bare term 'rider' improved results. Do not add 'rider' itself back as a prompt."
+  },
+  "terrain": {
+    "definition": "Grass, all kinds of horizontal vegetation, soil or sand. These areas are not meant to be driven on. This label includes a possibly delimiting curb. Single grass stalks do not need to be annotated and get the label of the region they are growing on.",
+    "positive": [
+      "grass-covered ground",
+      "lawn",
+      "bare soil",
+      "dirt patch",
+      "sand",
+      "horizontal vegetation"
+    ],
+    "negative": [
+      "road",
+      "sidewalk",
+      "parking area",
+      "tree canopy",
+      "bush",
+      "shrub",
+      "vertical vegetation"
+    ],
+    "confusable_classes": [
+      "vegetation",
+      "road",
+      "sidewalk"
+    ],
+    "generation_notes": "Empirically validated: decomposing into concrete visual nouns ('grass', 'lawn', 'bare soil', 'sand') without the abstract bare term 'terrain' improved results. Do not add 'terrain' itself back as a prompt."
+  }
+}

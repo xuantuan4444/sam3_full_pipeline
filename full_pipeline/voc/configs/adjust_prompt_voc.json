@@ -1,0 +1,34 @@
+{
+  "tvmonitor": [
+    "monitor",
+    "television",
+    "computer screen",
+    "flat screen"
+  ],
+  "chair": [
+    "chair",
+    "office chair",
+    "dining chair"
+  ],
+  "bicycle": [
+    "bicycle",
+    "bicycle frame",
+    "mountain bike"
+  ],
+  "sofa": [
+    "sofa",
+    "couch",
+    "long couch",
+    "multi-seat sofa"
+  ],
+  "pottedplant": [
+    "potted bush",
+    "houseplant",
+    "flower pot",
+    "indoor plant"
+  ],
+  "diningtable": [
+    "dining table",
+    "dining room table"
+  ]
+}

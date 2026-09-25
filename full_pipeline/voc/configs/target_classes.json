@@ -1,0 +1,11 @@
+{
+  "target_classes": [
+    "tvmonitor",
+    "chair",
+    "bicycle",
+    "sofa",
+    "pottedplant",
+    "diningtable"
+  ],
+  "note": "Same list/order as the target classes of the original no-LLM notebooks. Replace this file with the target_classes.json produced by tools/select_refinement_classes.py if you have it."
+}
