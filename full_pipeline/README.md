@@ -90,6 +90,7 @@ git clone <repo> && cd <repo>/full_pipeline/pc59
 ```
 
 ### 3.2 Dữ liệu (`pc59/data/`)
+download: https://drive.google.com/drive/folders/1dCwcG-Pyh_FwatlaPVYjBrcNs2yUwGWk?usp=sharing
 
 ```
 data/
@@ -99,17 +100,14 @@ data/
 └── pascal_context_val.txt      # 5105 dòng
 ```
 
-Nếu dữ liệu đã nằm ở chỗ khác trên server, có thể dùng symlink thay vì copy:
-
-```bash
-ln -s /datastore/.../JPEGImages data/JPEGImages
-```
+Nếu dữ liệu đã nằm ở chỗ khác trên server, hãy điều chỉnh
 
 `59_labels.txt` **không cần**. Thứ tự 59 lớp được viết cứng theo alphabet trong `pc59_common.py`.
 
 ### 3.3 Checkpoint SAM3
+https://drive.google.com/file/d/1FiUmJKX-CFvkKdcKecsdwikGJ2kVO7Eu/view?usp=sharing
 
-Đặt file vào `weights/sam3.pt`. Có thể symlink, hoặc chỉ ra đường dẫn bằng `--sam3-ckpt /path/sam3.pt` hay biến môi trường `SAM3_CKPT=/path/sam3.pt`.
+Đặt file vào `weights/sam3.pt`
 
 DINOv2 (ViT-S/14) và trọng số ImageNet của ResNet-34 tự tải về qua mạng ở lần chạy đầu.
 
@@ -158,10 +156,9 @@ Trong output phải thấy prompt thật, ví dụ `shelves -> ['shelves', 'shel
 python run_pipeline_pc59.py --skip-nollm --limit 5
 ```
 
-**Bước 3. Chạy thật.** Nên chạy trong `tmux` hoặc `nohup`:
+**Bước 3. Chạy thật.**
 
 ```bash
-tmux new -s pc59llm
 python run_pipeline_pc59.py --skip-nollm
 ```
 
