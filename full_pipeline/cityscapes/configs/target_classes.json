@@ -1,19 +1,187 @@
 {
+  "method": "auto",
+  "alpha": 0.5,
+  "beta": 0.5,
+  "bic": {
+    "bic_1_component": -17.659591183137334,
+    "bic_2_component": -18.79932018437333,
+    "delta_bic": 1.1397290012359953,
+    "evidence_strength": "weak"
+  },
+  "method_used": "cumulative",
+  "bic_threshold": 2.0,
+  "cumulative_budget": 0.8,
+  "cumulative_reach_index": 14,
+  "num_total_classes": 19,
+  "num_selected": 14,
   "target_classes": [
-    "sidewalk",
-    "bus",
+    "terrain",
+    "rider",
+    "train",
+    "wall",
     "vegetation",
-    "bicycle",
-    "motorcycle",
+    "fence",
+    "pole",
     "person",
     "traffic sign",
+    "sidewalk",
     "traffic light",
-    "pole",
-    "fence",
-    "wall",
-    "train",
-    "rider",
-    "terrain"
+    "motorcycle",
+    "bicycle",
+    "building"
   ],
-  "note": "Same list/order as the target classes of the original no-LLM notebooks. Replace this file with the target_classes.json produced by tools/select_refinement_classes.py if you have it."
+  "full_ranking": [
+    {
+      "class": "terrain",
+      "iou": 0.0,
+      "deficit_norm": 1.0,
+      "error_contribution": 0.056638,
+      "priority": 0.528319,
+      "selected": true
+    },
+    {
+      "class": "rider",
+      "iou": 0.0553,
+      "deficit_norm": 0.9447,
+      "error_contribution": 0.014187,
+      "priority": 0.479443,
+      "selected": true
+    },
+    {
+      "class": "train",
+      "iou": 0.3705,
+      "deficit_norm": 0.6295,
+      "error_contribution": 0.004861,
+      "priority": 0.317181,
+      "selected": true
+    },
+    {
+      "class": "wall",
+      "iou": 0.452,
+      "deficit_norm": 0.548,
+      "error_contribution": 0.04197,
+      "priority": 0.294985,
+      "selected": true
+    },
+    {
+      "class": "vegetation",
+      "iou": 0.7452,
+      "deficit_norm": 0.2548,
+      "error_contribution": 0.312955,
+      "priority": 0.283878,
+      "selected": true
+    },
+    {
+      "class": "fence",
+      "iou": 0.5714,
+      "deficit_norm": 0.4286,
+      "error_contribution": 0.02982,
+      "priority": 0.22921,
+      "selected": true
+    },
+    {
+      "class": "pole",
+      "iou": 0.5997,
+      "deficit_norm": 0.4003,
+      "error_contribution": 0.050162,
+      "priority": 0.225231,
+      "selected": true
+    },
+    {
+      "class": "person",
+      "iou": 0.7016,
+      "deficit_norm": 0.2984,
+      "error_contribution": 0.032409,
+      "priority": 0.165404,
+      "selected": true
+    },
+    {
+      "class": "traffic sign",
+      "iou": 0.7014,
+      "deficit_norm": 0.2986,
+      "error_contribution": 0.014992,
+      "priority": 0.156796,
+      "selected": true
+    },
+    {
+      "class": "sidewalk",
+      "iou": 0.779,
+      "deficit_norm": 0.221,
+      "error_contribution": 0.09041,
+      "priority": 0.155705,
+      "selected": true
+    },
+    {
+      "class": "traffic light",
+      "iou": 0.6999,
+      "deficit_norm": 0.3001,
+      "error_contribution": 0.004651,
+      "priority": 0.152376,
+      "selected": true
+    },
+    {
+      "class": "motorcycle",
+      "iou": 0.7205,
+      "deficit_norm": 0.2795,
+      "error_contribution": 0.001752,
+      "priority": 0.140626,
+      "selected": true
+    },
+    {
+      "class": "bicycle",
+      "iou": 0.7343,
+      "deficit_norm": 0.2657,
+      "error_contribution": 0.013991,
+      "priority": 0.139845,
+      "selected": true
+    },
+    {
+      "class": "building",
+      "iou": 0.8938,
+      "deficit_norm": 0.1062,
+      "error_contribution": 0.164566,
+      "priority": 0.135383,
+      "selected": true
+    },
+    {
+      "class": "bus",
+      "iou": 0.7574,
+      "deficit_norm": 0.2426,
+      "error_contribution": 0.007942,
+      "priority": 0.125271,
+      "selected": false
+    },
+    {
+      "class": "road",
+      "iou": 0.9563,
+      "deficit_norm": 0.0437,
+      "error_contribution": 0.112305,
+      "priority": 0.078002,
+      "selected": false
+    },
+    {
+      "class": "truck",
+      "iou": 0.8547,
+      "deficit_norm": 0.1453,
+      "error_contribution": 0.00325,
+      "priority": 0.074275,
+      "selected": false
+    },
+    {
+      "class": "car",
+      "iou": 0.9352,
+      "deficit_norm": 0.0648,
+      "error_contribution": 0.029198,
+      "priority": 0.046999,
+      "selected": false
+    },
+    {
+      "class": "sky",
+      "iou": 0.9409,
+      "deficit_norm": 0.0591,
+      "error_contribution": 0.013942,
+      "priority": 0.036521,
+      "selected": false
+    }
+  ]
 }

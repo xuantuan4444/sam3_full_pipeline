@@ -1,34 +1,30 @@
 {
-  "tvmonitor": [
-    "monitor",
-    "television",
-    "computer screen",
-    "flat screen"
-  ],
-  "chair": [
-    "chair",
-    "office chair",
-    "dining chair"
-  ],
-  "bicycle": [
-    "bicycle",
-    "bicycle frame",
-    "mountain bike"
+  "diningtable": [
+    "dining table",
+    "kitchen table"
   ],
   "sofa": [
     "sofa",
     "couch",
-    "long couch",
-    "multi-seat sofa"
+    "loveseat"
   ],
   "pottedplant": [
-    "potted bush",
+    "potted plant",
     "houseplant",
-    "flower pot",
-    "indoor plant"
+    "planter"
   ],
-  "diningtable": [
-    "dining table",
-    "dining room table"
+  "bicycle": [
+    "bicycle",
+    "bike"
+  ],
+  "chair": [
+    "chair",
+    "armchair",
+    "office chair"
+  ],
+  "tvmonitor": [
+    "tv monitor",
+    "television",
+    "computer monitor"
   ]
 }

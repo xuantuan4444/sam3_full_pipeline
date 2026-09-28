@@ -1,11 +1,186 @@
 {
+  "method": "auto",
+  "alpha": 0.5,
+  "beta": 0.5,
+  "bic": {
+    "bic_1_component": -7.510575991610668,
+    "bic_2_component": -19.347199409200954,
+    "delta_bic": 11.836623417590285,
+    "evidence_strength": "very strong"
+  },
+  "method_used": "gmm",
+  "bic_threshold": 2.0,
+  "gmm_high_component": 1,
+  "num_total_classes": 20,
+  "num_selected": 6,
   "target_classes": [
-    "tvmonitor",
-    "chair",
-    "bicycle",
+    "diningtable",
     "sofa",
     "pottedplant",
-    "diningtable"
+    "bicycle",
+    "chair",
+    "tvmonitor"
   ],
-  "note": "Same list/order as the target classes of the original no-LLM notebooks. Replace this file with the target_classes.json produced by tools/select_refinement_classes.py if you have it."
+  "full_ranking": [
+    {
+      "class": "diningtable",
+      "iou": 0.4032,
+      "deficit_norm": 1.0,
+      "error_contribution": 0.183844,
+      "priority": 0.591922,
+      "selected": true
+    },
+    {
+      "class": "sofa",
+      "iou": 0.5403,
+      "deficit_norm": 0.770275,
+      "error_contribution": 0.218624,
+      "priority": 0.494449,
+      "selected": true
+    },
+    {
+      "class": "pottedplant",
+      "iou": 0.5273,
+      "deficit_norm": 0.792058,
+      "error_contribution": 0.059889,
+      "priority": 0.425973,
+      "selected": true
+    },
+    {
+      "class": "bicycle",
+      "iou": 0.5515,
+      "deficit_norm": 0.751508,
+      "error_contribution": 0.054561,
+      "priority": 0.403035,
+      "selected": true
+    },
+    {
+      "class": "chair",
+      "iou": 0.5891,
+      "deficit_norm": 0.688505,
+      "error_contribution": 0.101686,
+      "priority": 0.395096,
+      "selected": true
+    },
+    {
+      "class": "tvmonitor",
+      "iou": 0.7348,
+      "deficit_norm": 0.44437,
+      "error_contribution": 0.041469,
+      "priority": 0.24292,
+      "selected": true
+    },
+    {
+      "class": "boat",
+      "iou": 0.8204,
+      "deficit_norm": 0.300938,
+      "error_contribution": 0.023698,
+      "priority": 0.162318,
+      "selected": false
+    },
+    {
+      "class": "bottle",
+      "iou": 0.84,
+      "deficit_norm": 0.268097,
+      "error_contribution": 0.031104,
+      "priority": 0.1496,
+      "selected": false
+    },
+    {
+      "class": "car",
+      "iou": 0.8712,
+      "deficit_norm": 0.215818,
+      "error_contribution": 0.044818,
+      "priority": 0.130318,
+      "selected": false
+    },
+    {
+      "class": "aeroplane",
+      "iou": 0.895,
+      "deficit_norm": 0.175938,
+      "error_contribution": 0.019038,
+      "priority": 0.097488,
+      "selected": false
+    },
+    {
+      "class": "person",
+      "iou": 0.9326,
+      "deficit_norm": 0.112936,
+      "error_contribution": 0.078457,
+      "priority": 0.095696,
+      "selected": false
+    },
+    {
+      "class": "train",
+      "iou": 0.9129,
+      "deficit_norm": 0.145945,
+      "error_contribution": 0.031255,
+      "priority": 0.0886,
+      "selected": false
+    },
+    {
+      "class": "horse",
+      "iou": 0.9081,
+      "deficit_norm": 0.153988,
+      "error_contribution": 0.020993,
+      "priority": 0.08749,
+      "selected": false
+    },
+    {
+      "class": "dog",
+      "iou": 0.9478,
+      "deficit_norm": 0.087466,
+      "error_contribution": 0.02323,
+      "priority": 0.055348,
+      "selected": false
+    },
+    {
+      "class": "bus",
+      "iou": 0.9479,
+      "deficit_norm": 0.087299,
+      "error_contribution": 0.020174,
+      "priority": 0.053736,
+      "selected": false
+    },
+    {
+      "class": "bird",
+      "iou": 0.9425,
+      "deficit_norm": 0.096347,
+      "error_contribution": 0.010951,
+      "priority": 0.053649,
+      "selected": false
+    },
+    {
+      "class": "motorbike",
+      "iou": 0.9554,
+      "deficit_norm": 0.074732,
+      "error_contribution": 0.01009,
+      "priority": 0.042411,
+      "selected": false
+    },
+    {
+      "class": "sheep",
+      "iou": 0.9547,
+      "deficit_norm": 0.075905,
+      "error_contribution": 0.00763,
+      "priority": 0.041767,
+      "selected": false
+    },
+    {
+      "class": "cow",
+      "iou": 0.9709,
+      "deficit_norm": 0.04876,
+      "error_contribution": 0.007448,
+      "priority": 0.028104,
+      "selected": false
+    },
+    {
+      "class": "cat",
+      "iou": 0.9776,
+      "deficit_norm": 0.037534,
+      "error_contribution": 0.011043,
+      "priority": 0.024288,
+      "selected": false
+    }
+  ]
 }

@@ -1,0 +1,114 @@
+{
+  "terrain": {
+    "definition": "Grass, all kinds of horizontal vegetation, soil or sand. These areas are not meant to be driven on. This label includes a possibly delimiting curb. Single grass stalks do not need to be annotated and get the label of the region they are growing on.",
+    "anchor_prompts": ["terrain"],
+    "positive": ["grass", "lawn", "soil", "sand", "dirt ground"],
+    "negative": ["tree", "hedge", "bush", "road", "sidewalk"],
+    "confusable_classes": ["vegetation", "sidewalk"],
+    "generation_notes": "Grass and other low, horizontal plants belong here, not to vegetation. Never add 'curb' as a standalone prompt: it is only included when it delimits a terrain area."
+  },
+  "rider": {
+    "definition": "A human that would use some device to move a distance of 1m. Includes, riders/drivers of bicycle, motorbike, scooter, skateboards, horses, roller-blades, wheel-chairs, road cleaning cars, cars without roof. Note that a visible driver of a car with roof can only be seen through the window. Since holes are not labeled, the human is included in the car label.",
+    "anchor_prompts": ["rider"],
+    "positive": ["cyclist", "motorcyclist", "person riding a bicycle", "person riding a motorbike", "person on a scooter"],
+    "negative": ["pedestrian", "person walking", "bicycle", "motorcycle", "car"],
+    "confusable_classes": ["person", "bicycle", "motorcycle"],
+    "generation_notes": "The mask covers only the human, not the vehicle. A person pushing a bicycle or standing next to it is person, not rider."
+  },
+  "train": {
+    "definition": "Vehicle on rails",
+    "anchor_prompts": ["train"],
+    "positive": ["tram", "streetcar", "light rail vehicle", "railway carriage"],
+    "negative": ["bus", "truck", "railway track"],
+    "confusable_classes": ["bus", "truck"],
+    "generation_notes": "Trams and streetcars are the most common rail vehicles in urban scenes and belong to this class."
+  },
+  "wall": {
+    "definition": "individual standing wall. Not part of a building.",
+    "anchor_prompts": ["wall"],
+    "positive": ["freestanding wall", "stone wall", "concrete wall", "retaining wall", "brick wall"],
+    "negative": ["building", "building facade", "fence", "hedge"],
+    "confusable_classes": ["building", "fence"],
+    "generation_notes": "Walls that are part of a building belong to building. Avoid prompts like 'building wall' or 'exterior wall' as positives."
+  },
+  "vegetation": {
+    "definition": "Tree, hedge, all kinds of vertical vegetation. Plants attached to buildings are usually not annotated separately and labeled building as well. If growing at the side of a wall or building, marked as vegetation if it covers a substantial part of the surface (more than 20%).",
+    "anchor_prompts": ["vegetation"],
+    "positive": ["tree", "hedge", "bush", "shrub", "tree foliage"],
+    "negative": ["grass", "lawn", "terrain", "building"],
+    "confusable_classes": ["terrain", "building"],
+    "generation_notes": "Only vertical vegetation belongs here. Grass and ground-level plants belong to terrain."
+  },
+  "fence": {
+    "definition": "Fence including any holes.",
+    "anchor_prompts": ["fence"],
+    "positive": ["metal fence", "chain-link fence", "wooden fence", "railing", "barrier fence"],
+    "negative": ["wall", "building", "hedge", "pole"],
+    "confusable_classes": ["wall", "pole"],
+    "generation_notes": "The mask includes the holes in the fence, so the region seen through it is still fence."
+  },
+  "pole": {
+    "definition": "Small mainly vertically oriented pole. E.g. sign pole, traffic light poles. If the pole has a horizontal part (often for traffic light poles) this part is also considered pole. If there are things mounted at the pole that are neither traffic light nor traffic sign (e.g. street lights) and that have a diameter (in pixels) of at most twice the diameter of the pole, then these things might also be labeled pole. If they are larger, they are labeled static.",
+    "anchor_prompts": ["pole"],
+    "positive": ["sign pole", "traffic light pole", "lamp post", "street light pole", "utility pole"],
+    "negative": ["traffic sign", "traffic light", "tree trunk", "fence"],
+    "confusable_classes": ["traffic sign", "traffic light", "vegetation"],
+    "generation_notes": "The pole excludes the traffic sign and traffic light mounted on it, but includes horizontal arms of traffic light poles."
+  },
+  "person": {
+    "definition": "A human that satisfies the following criterion. Assume the human moved a distance of 1m and stopped again. If the human would walk, the label is person, otherwise not. Examples are people walking, standing or sitting on the ground, on a bench, on a chair. This class also includes toddlers, someone pushing a bicycle or standing next to it with both legs on the same side of the bicycle. This class includes anything that is carried by the person, e.g. backpack, but not items touching the ground, e.g. trolleys.",
+    "anchor_prompts": ["person"],
+    "positive": ["pedestrian", "person walking", "person standing", "person sitting", "child"],
+    "negative": ["cyclist", "motorcyclist", "rider", "trolley"],
+    "confusable_classes": ["rider"],
+    "generation_notes": "Carried items like backpacks and bags belong to the person, so never put them in negatives. Humans riding a bicycle or motorbike are rider."
+  },
+  "traffic sign": {
+    "definition": "Sign installed from the state/city authority, usually for information of the driver/cyclist/pedestrian in an everyday traffic scene, e.g. traffic- signs, parking signs, direction signs - without their poles. No ads/commercial signs. Only the front side of a sign containing the information. The back side is static. Note that commercial signs attached to buildings become building, attached to poles or standing on their own become static.",
+    "anchor_prompts": ["traffic sign"],
+    "positive": ["road sign", "street sign", "parking sign", "direction sign", "stop sign"],
+    "negative": ["billboard", "advertisement", "shop sign", "pole", "traffic light"],
+    "confusable_classes": ["pole", "traffic light", "building"],
+    "generation_notes": "Only the front face of official signs counts. Commercial signs and the pole are excluded."
+  },
+  "sidewalk": {
+    "definition": "Part of ground designated for pedestrians or cyclists. Delimited from the road by some obstacle, e.g. curbs or poles (might be small), not only by markings. Often elevated compared to the road. Often located at the sides of a road. This label includes a possibly delimiting curb, traffic islands (the walkable part), or pedestrian zones (where usually cars are not allowed to drive during day-time).",
+    "anchor_prompts": ["sidewalk"],
+    "positive": ["pavement", "footpath", "pedestrian walkway", "pedestrian zone", "traffic island"],
+    "negative": ["road", "driving lane", "terrain", "grass"],
+    "confusable_classes": ["road", "terrain"],
+    "generation_notes": "Keep 'sidewalk' as the anchor and add at most one additional prompt. Never add 'curb' as a standalone prompt."
+  },
+  "traffic light": {
+    "definition": "The traffic light box without its poles.",
+    "anchor_prompts": ["traffic light"],
+    "positive": ["traffic signal", "traffic light box", "pedestrian signal"],
+    "negative": ["pole", "street lamp", "traffic sign"],
+    "confusable_classes": ["pole", "traffic sign"],
+    "generation_notes": "Only the signal housing counts. The supporting pole and its horizontal arm are pole."
+  },
+  "motorcycle": {
+    "definition": "Motorbike, moped, scooter without the driver (that's a rider, see above).",
+    "anchor_prompts": ["motorcycle"],
+    "positive": ["motorbike", "moped", "scooter", "parked motorcycle"],
+    "negative": ["bicycle", "car", "rider", "motorcyclist"],
+    "confusable_classes": ["bicycle", "rider"],
+    "generation_notes": "The mask excludes the driver, so keep 'rider' in negatives."
+  },
+  "bicycle": {
+    "definition": "Bicycle without the driver (that's a rider, see above).",
+    "anchor_prompts": ["bicycle"],
+    "positive": ["bike", "parked bicycle", "city bike", "road bike"],
+    "negative": ["motorcycle", "rider", "cyclist", "person"],
+    "confusable_classes": ["motorcycle", "rider"],
+    "generation_notes": "The mask excludes the cyclist, so keep 'rider' and 'cyclist' in negatives."
+  },
+  "building": {
+    "definition": "Building, skyscraper, house, bus stop building, garage, car port. If a building has a glass wall that you can see through, the wall is still building. Includes scaffolding attached to buildings.",
+    "anchor_prompts": ["building"],
+    "positive": ["house", "skyscraper", "apartment building", "garage", "bus stop shelter", "scaffolding"],
+    "negative": ["wall", "fence", "vegetation", "sky"],
+    "confusable_classes": ["wall", "vegetation"],
+    "generation_notes": "Glass walls and attached scaffolding are part of the building. Freestanding walls belong to wall."
+  }
+}

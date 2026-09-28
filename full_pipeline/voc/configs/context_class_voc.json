@@ -1,0 +1,49 @@
+{
+  "diningtable": {
+    "definition": "A table used for eating meals, including kitchen and restaurant tables. Covers the tabletop, legs and any tablecloth; objects placed on the table are not part of it.",
+    "anchor_prompts": ["dining table"],
+    "positive": ["kitchen table", "restaurant table", "table set for a meal", "table with tablecloth"],
+    "negative": ["desk", "workbench", "wooden board", "wooden plank", "countertop", "floor"],
+    "confusable_classes": ["chair", "sofa"],
+    "generation_notes": "Never use 'wood', 'wooden table' or bare 'table' as prompts: they pull in wooden surfaces and non-dining tables. Do not put 'tablecloth' in negatives because a tablecloth covering the table belongs to this class."
+  },
+  "sofa": {
+    "definition": "A long upholstered seat with a back and usually arms, designed for two or more people.",
+    "anchor_prompts": ["sofa"],
+    "positive": ["couch", "loveseat", "sectional sofa", "settee"],
+    "negative": ["chair", "armchair", "bench", "bed", "cushion"],
+    "confusable_classes": ["chair"],
+    "generation_notes": "Main confusion is with chair. Single-seat upholstered seats (armchairs) belong to chair, so keep 'armchair' in negatives and never use 'upholstered chair' or 'seat' as a positive."
+  },
+  "pottedplant": {
+    "definition": "A plant or flowers growing in a container, including the pot itself.",
+    "anchor_prompts": ["potted plant"],
+    "positive": ["houseplant", "plant in a pot", "flower pot", "potted flowers", "planter"],
+    "negative": ["tree", "grass", "hedge", "lawn"],
+    "confusable_classes": [],
+    "generation_notes": "The mask covers both the plant (including flowers) and the pot. Never put 'flower', 'pot' or 'vase' in negatives, since that suppresses parts of the target."
+  },
+  "bicycle": {
+    "definition": "A human-powered vehicle with two wheels, pedals and a frame, ridden or parked.",
+    "anchor_prompts": ["bicycle"],
+    "positive": ["bike", "mountain bike", "road bike", "parked bicycle"],
+    "negative": ["motorbike", "motorcycle", "scooter", "person"],
+    "confusable_classes": ["motorbike"],
+    "generation_notes": "Keep 'person' in negatives so riders are excluded from the bicycle mask."
+  },
+  "chair": {
+    "definition": "A separate seat for one person, typically with a back and legs, including armchairs.",
+    "anchor_prompts": ["chair"],
+    "positive": ["office chair", "dining chair", "armchair", "folding chair"],
+    "negative": ["sofa", "couch", "bench", "diningtable"],
+    "confusable_classes": ["sofa", "diningtable"],
+    "generation_notes": "Avoid generic prompts like 'seat' that also match sofas and benches."
+  },
+  "tvmonitor": {
+    "definition": "A standalone electronic display screen, such as a television or computer monitor.",
+    "anchor_prompts": ["tv monitor", "television"],
+    "positive": ["tv screen", "computer monitor", "flat screen display"],
+    "negative": ["window", "picture frame", "painting", "mirror", "keyboard"],
+    "confusable_classes": []
+  }
+}
