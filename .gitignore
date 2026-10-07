@@ -4,6 +4,10 @@
 !/.gitignore
 !/full_pipeline/
 
+# Inside full_pipeline/: local-only docs and paper draft
+full_pipeline/docs/
+full_pipeline/mock_paper_sam3/
+
 # Never commit data, weights, pipeline outputs or caches
 full_pipeline/*/data/
 full_pipeline/*/weights/
