@@ -64,13 +64,16 @@ TRAIN_RAW_VALUE = {name: i for i, name in enumerate(CLASSES)}
 TRAIN_PARAMS = {
     "image_h": 512,
     "image_w": 1024,
-    "batch_size": 2,
+    "batch_size": 32,
     "epochs": 30,
     "warmup_epochs": 2,
     "lr": 1e-4,
     "weight_decay": 1e-4,
     "patience": 8,
     "focal_gamma": 1.5,
+    # Per-class keys must be the classes in configs/target_classes.json (auto-selected, cumulative
+    # budget): `building` replaces the manually chosen `bus` of the old notebooks. Classes without an
+    # entry fall back to the defaults; entries for non-target classes are ignored with a warning.
     "default_tversky": (0.5, 0.5),
     "tversky": {
         "sidewalk": (0.50, 0.50),
@@ -78,8 +81,8 @@ TRAIN_PARAMS = {
         "terrain": (0.50, 0.50),
         "wall": (0.50, 0.50),
         "person": (0.50, 0.50),
+        "building": (0.50, 0.50),
         "fence": (0.45, 0.55),
-        "bus": (0.45, 0.55),
         "pole": (0.40, 0.60),
         "train": (0.40, 0.60),
         "bicycle": (0.35, 0.65),
@@ -95,7 +98,7 @@ TRAIN_PARAMS = {
         "sidewalk": 1.0,
         "wall": 1.0,
         "person": 1.0,
-        "bus": 1.0,
+        "building": 1.0,
         "train": 1.0,
         "fence": 1.5,
         "rider": 2.0,

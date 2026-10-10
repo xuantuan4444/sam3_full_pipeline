@@ -66,7 +66,7 @@ TRAIN_RAW_VALUE = {name: i + 1 for i, name in enumerate(CLASSES)}
 TRAIN_PARAMS = {
     "image_h": 512,
     "image_w": 512,
-    "batch_size": 4,
+    "batch_size": 32,
     "epochs": 30,
     "warmup_epochs": 2,
     "lr": 1e-4,

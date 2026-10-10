@@ -208,7 +208,7 @@ python run_pipeline_pc59.py --skip-nollm
 - Nhãn eval: 0..58 là lớp, 255 là ignore. Pixel nền (raw 0) bị bỏ qua.
 - Pixel mà SAM3 không gán cho lớp nào mang giá trị 255 và **không** được tính vào confusion matrix.
 - mIoU là trung bình trên đủ 59 lớp.
-- Hyperparameter: ảnh 512×512, batch 4, patience 8. Tversky (0.5, 0.5) và λ = 1 cho mọi lớp, không có CE boost (giống bản no-LLM đã chạy).
+- Hyperparameter: ảnh 512×512, batch 32, patience 8. Tversky (0.5, 0.5) và λ = 1 cho mọi lớp, không có CE boost (giống bản no-LLM đã chạy).
 
 ### 5.6 Kiểm tra riêng cho PC59
 
@@ -268,7 +268,7 @@ Muốn chạy từng nhánh riêng thì thêm `--skip-llm` hoặc `--skip-nollm`
 - Nhãn eval: 0 = nền, 1..20 = lớp, 255 = void (bỏ qua).
 - Pixel SAM3 không gán lớp nào được tính là **nền (0)**, nên pixel bị bỏ sót vẫn làm giảm IoU của lớp đó.
 - mIoU là trung bình trên **20 lớp** (không tính nền).
-- Hyperparameter: ảnh 512×512, batch 4, patience 10, CE boost ×1.5 cho `bicycle`. Tversky/Boundary theo từng lớp:
+- Hyperparameter: ảnh 512×512, batch 32, patience 10, CE boost ×1.5 cho `bicycle`. Tversky/Boundary theo từng lớp:
   - sofa 0.5/0.5, λ 1.0
   - chair 0.45/0.55, λ 1.5
   - diningtable 0.45/0.55, λ 1.0
@@ -334,7 +334,7 @@ python run_pipeline_cityscapes.py --skip-nollm
 - Nhãn eval: trainId + 1 (1..19 là lớp), 0 = "unlabeled", 255 = ignore.
 - Pixel SAM3 không gán lớp nào được tính là **unlabeled (0)**, nên pixel bị bỏ sót vẫn làm giảm IoU.
 - mIoU là trung bình trên **19 lớp**.
-- Hyperparameter: ảnh 512×1024, batch 2, patience 8, CE boost ×1.5 cho `rider`. Tversky/Boundary theo từng lớp:
+- Hyperparameter: ảnh 512×1024, batch 32, patience 8, CE boost ×1.5 cho `rider`. Tversky/Boundary theo từng lớp:
   - (0.35, 0.65) cho các lớp nhỏ và mảnh: bicycle, motorcycle, traffic sign, traffic light, rider;
   - λ = 2.5 cho pole, traffic sign, traffic light.
 - Chi tiết nằm trong `TRAIN_PARAMS`, mục A của `cityscapes_common.py`.

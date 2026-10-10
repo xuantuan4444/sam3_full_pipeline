@@ -7,6 +7,8 @@
 # Inside full_pipeline/: local-only docs and paper draft
 full_pipeline/docs/
 full_pipeline/mock_paper_sam3/
+full_pipeline/per_class_metric_3_dataset/
+full_pipeline/normal_2461.out
 
 # Never commit data, weights, pipeline outputs or caches
 full_pipeline/*/data/
