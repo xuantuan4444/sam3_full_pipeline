@@ -158,13 +158,14 @@ def step_command(step, arm, args, out_root, force):
 
 def step_done(step, paths, fps):
     if step == "baseline":
-        return C.is_complete(paths.baseline_dir, fps["baseline"]) and C.is_complete(paths.val_cache, fps["baseline"])
+        return (C.is_complete(paths.baseline_dir, fps["baseline"]) and C.metrics_current(paths.baseline_dir)
+                and C.is_complete(paths.val_cache, fps["baseline"]))
     if step == "coarse":
         return C.is_complete(paths.coarse_cache, fps["coarse"])
     kind, arch = step.split(":")
     if kind == "train":
         return C.is_complete(paths.ckpt_dir(arch), fps[step]) and paths.best_ckpt(arch).exists()
-    return C.is_complete(paths.val_dir(arch), fps[step])
+    return C.is_complete(paths.val_dir(arch), fps[step]) and C.metrics_current(paths.val_dir(arch))
 
 
 def build_plan(arms, archs, args, out_root):

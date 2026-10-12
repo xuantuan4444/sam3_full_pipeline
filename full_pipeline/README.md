@@ -206,7 +206,7 @@ python run_pipeline_pc59.py --skip-nollm
 ### 5.5 Quy ước metric (giữ nguyên như bản đã chạy)
 
 - Nhãn eval: 0..58 là lớp, 255 là ignore. Pixel nền (raw 0) bị bỏ qua.
-- Pixel mà SAM3 không gán cho lớp nào mang giá trị 255 và **không** được tính vào confusion matrix.
+- Pixel mà SAM3 không gán cho lớp nào (giá trị 255) được tính là **FN của lớp GT** (cột "không dự đoán" trong `confusion_matrix.npy`), giống cách đánh giá chuẩn của mmsegmentation. Phiên bản cách đo được ghi trong `manifest.json` (`metric_version` = 2); kết quả tính theo cách cũ (pixel này bị bỏ qua) sẽ tự được tính lại mà không cần chạy lại SAM3 hay train lại.
 - mIoU là trung bình trên đủ 59 lớp.
 - Hyperparameter: ảnh 512×512, batch 32, patience 8. Tversky (0.5, 0.5) và λ = 1 cho mọi lớp, không có CE boost (giống bản no-LLM đã chạy).
 

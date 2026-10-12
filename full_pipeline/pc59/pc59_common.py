@@ -545,29 +545,56 @@ def query_class(processor, state, prompts):
 # ---------------------------------------------------------------------------
 # Metrics + plots
 # ---------------------------------------------------------------------------
+# Version of the evaluation protocol, stored in every baseline/val manifest. Results computed with
+# an older version are recomputed automatically (baseline: from val_cache, no SAM3; val: no training).
+#   v1: pixels whose prediction is outside [0, K) were dropped from the confusion matrix, so a pixel
+#       SAM3 left unassigned (PC59: 255) cost nothing.
+#   v2: standard protocol (as in mmsegmentation): every GT-valid pixel is counted; a prediction
+#       outside [0, K) lands in an extra "no prediction" column and is a false negative of its GT
+#       class. VOC/Cityscapes never predict outside [0, K) (no-prediction is class 0), so their
+#       numbers are identical under v1 and v2; only PC59 changes.
+METRIC_VERSION = 2
+
+
+def new_confusion_matrix(num_classes=EVAL_NUM_CLASSES):
+    """[K, K+1] int64: rows = GT class, cols 0..K-1 = predicted class, col K = no valid prediction."""
+    return np.zeros((num_classes, num_classes + 1), dtype=np.int64)
+
+
 def fast_confusion_matrix(gt, pred, num_classes=EVAL_NUM_CLASSES):
-    """Rows = GT, cols = prediction. Pixels with GT == ignore, or any value outside
-    [0, num_classes), are dropped (PC59: a pixel SAM3 left at 255 is therefore not counted)."""
-    valid = (gt != EVAL_IGNORE) & (gt >= 0) & (gt < num_classes) & (pred >= 0) & (pred < num_classes)
-    hist = np.bincount(num_classes * gt[valid].astype(np.int64) + pred[valid].astype(np.int64),
-                       minlength=num_classes * num_classes)
-    return hist.reshape(num_classes, num_classes)
+    """[K, K+1] confusion matrix (see new_confusion_matrix). Pixels with GT == ignore (or GT
+    outside [0, K)) are dropped; every other pixel is counted, unassigned predictions in col K."""
+    valid = (gt != EVAL_IGNORE) & (gt >= 0) & (gt < num_classes)
+    g = gt[valid].astype(np.int64)
+    p = pred[valid].astype(np.int64)
+    p = np.where((p >= 0) & (p < num_classes), p, num_classes)
+    hist = np.bincount((num_classes + 1) * g + p, minlength=num_classes * (num_classes + 1))
+    return hist.reshape(num_classes, num_classes + 1)
+
+
+def metrics_current(d):
+    """True if the metrics in `d` were computed with the current METRIC_VERSION."""
+    m = read_manifest(d)
+    return bool(m) and m.get("metric_version") == METRIC_VERSION
 
 
 def compute_metrics(conf_mat, out_dir, title, target_classes=None, hybrid_label=None):
-    """Writes summary_metrics.csv + per_class_metrics.csv into out_dir. Formulas are the original
-    ones: IoU = diag / (union + eps); mIoU / mDice = nanmean over EVAL_METRIC_INDICES; pixel
-    accuracy over the whole confusion matrix."""
+    """Writes summary_metrics.csv, per_class_metrics.csv and confusion_matrix.npy into out_dir.
+    IoU = TP / (TP + FP + FN + eps), where FN includes GT pixels left without a valid prediction
+    (col K); mIoU / mDice = nanmean over EVAL_METRIC_INDICES; pixel accuracy over all counted pixels."""
     import pandas as pd
 
     eps = 1e-10
-    diag = np.diag(conf_mat).astype(np.float64)
+    K = conf_mat.shape[0]
+    pred_part = conf_mat[:, :K]
+    diag = np.diag(pred_part).astype(np.float64)
     gt_sum = conf_mat.sum(axis=1).astype(np.float64)
-    pred_sum = conf_mat.sum(axis=0).astype(np.float64)
+    pred_sum = pred_part.sum(axis=0).astype(np.float64)
     union = gt_sum + pred_sum - diag
     iou = diag / (union + eps)
     dice = (2.0 * diag) / (gt_sum + pred_sum + eps)
     pixel_acc = diag.sum() / (conf_mat.sum() + eps)
+    no_pred_share = float(conf_mat[:, K:].sum() / (conf_mat.sum() + eps))
 
     idx = EVAL_METRIC_INDICES
     miou = float(np.nanmean(iou[idx]))
@@ -593,18 +620,22 @@ def compute_metrics(conf_mat, out_dir, title, target_classes=None, hybrid_label=
         s = class_df[~class_df["Class"].isin(target_classes)]["IoU"]
         metric_names += [f"mIoU_w ({len(w)} target classes)", f"mIoU_s ({len(s)} other classes)"]
         values += [float(w.mean()), float(s.mean())]
+    metric_names.append("No-prediction pixels (share of counted GT)")
+    values.append(no_pred_share)
     summary_df = pd.DataFrame({"Metric": metric_names, "Value": values})
 
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     summary_df.to_csv(out_dir / "summary_metrics.csv", index=False)
     class_df.to_csv(out_dir / "per_class_metrics.csv", index=False)
+    np.save(out_dir / "confusion_matrix.npy", conf_mat)
 
     banner(f"SUMMARY -- {title}")
     print(summary_df.to_string(index=False, formatters={"Value": lambda x: f"{x:.4f}"}))
     print(f"\nPER-CLASS ({len(idx)} classes, IoU ascending)")
     print(class_df.to_string(index=False, formatters={"IoU": lambda x: f"{x:.4f}", "Dice": lambda x: f"{x:.4f}"}))
-    print(f"\nSaved: {out_dir / 'summary_metrics.csv'}\nSaved: {out_dir / 'per_class_metrics.csv'}")
+    print(f"\nSaved: {out_dir / 'summary_metrics.csv'}\nSaved: {out_dir / 'per_class_metrics.csv'}"
+          f"\nSaved: {out_dir / 'confusion_matrix.npy'}  (rows = GT, last column = no prediction)")
     return iou, class_df, miou
 
 

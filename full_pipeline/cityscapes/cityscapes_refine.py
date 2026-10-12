@@ -44,6 +44,7 @@ from cityscapes_common import (
     image_path, is_complete, load_gt_eval, load_gt_train_raw, load_prompt_config,
     plot_bar_chart, plot_class_visualizations, prepare_dir, read_split, resolve_out_root,
     set_seed, setup_torch, split_hash, train_valid_mask, write_manifest,
+    METRIC_VERSION, metrics_current, new_confusion_matrix,
 )
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -818,9 +819,12 @@ def val_main(arch):
             raise PipelineError(f"no finished training for {arch}/{args.arm}: {paths.ckpt_dir(arch)}")
 
     banner(f"HYBRID VAL SAM3 + {title} -- {DATASET_TITLE}, arm={args.arm}")
-    if is_complete(out_dir, fp) and not args.force:
+    if is_complete(out_dir, fp) and metrics_current(out_dir) and not args.force:
         print(f"[skip] already complete: {out_dir}")
         return
+    if is_complete(out_dir, fp) and not metrics_current(out_dir):
+        print(f"[metrics] {out_dir} was computed with an older evaluation protocol -> re-evaluating "
+              f"with v{METRIC_VERSION} (same checkpoint, no training)")
     if not is_complete(paths.val_cache, fps["baseline"]):
         raise PipelineError(f"val cache for arm '{args.arm}' is missing or outdated: {paths.val_cache}\n"
                             f"  run sam3_baseline_{DATASET}.py --arm {args.arm} first")
@@ -854,7 +858,7 @@ def val_main(arch):
     dino_model = load_dinov2(device) if dino else None
 
     val_ids = get_ids("val", args.limit)
-    conf_mat = np.zeros((EVAL_NUM_CLASSES, EVAL_NUM_CLASSES), dtype=np.int64)
+    conf_mat = new_confusion_matrix()
     class_samples = {}
     skipped, no_cache, errors = [], [], []
     t_start = time.time()
@@ -906,6 +910,6 @@ def val_main(arch):
                               target_classes=targets, hybrid_tag=hybrid_label)
     if errors:
         raise RuntimeError(f"{len(errors)} images failed during hybrid val -- metrics are incomplete; re-run.")
-    write_manifest(out_dir, "val", fp, "complete", arch=arch, checkpoint=str(ckpt_path),
+    write_manifest(out_dir, "val", fp, "complete", metric_version=METRIC_VERSION, arch=arch, checkpoint=str(ckpt_path),
                    checkpoint_epoch=ckpt.get("epoch"), n_evaluated=len(val_ids) - len(skipped) - len(no_cache),
                    skipped=skipped, no_cache=no_cache, miou=miou)

@@ -32,6 +32,7 @@ from pc59_common import (
     EVAL_NO_PREDICTION, EVAL_NUM_CLASSES, Paths, add_common_args, banner, build_sam3_processor,
     collect_sample, compute_metrics, cuda_empty_cache, fast_confusion_matrix, fingerprints,
     get_ids, gt_path, image_path, cache_key, is_complete, load_gt_eval, load_prompt_config,
+    METRIC_VERSION, metrics_current, new_confusion_matrix,
     plot_bar_chart, plot_class_visualizations, prepare_dir, query_class, resolve_out_root,
     resolve_sam3_ckpt, run_main, setup_torch, union_at_threshold, write_manifest,
 )
@@ -86,9 +87,12 @@ def main():
 
     banner(f"SAM3 BASELINE + VAL CACHE -- {DATASET_TITLE}, arm={args.arm}")
     pc.print_table()
-    if is_complete(paths.baseline_dir, fp) and not args.force:
+    if is_complete(paths.baseline_dir, fp) and metrics_current(paths.baseline_dir) and not args.force:
         print(f"[skip] already complete: {paths.baseline_dir}")
         return
+    if is_complete(paths.baseline_dir, fp) and not metrics_current(paths.baseline_dir):
+        print(f"[metrics] {paths.baseline_dir} was computed with an older evaluation protocol -> "
+              f"recomputing metrics (v{METRIC_VERSION}) from val_cache; SAM3 only runs for images missing from the cache")
 
     prepare_dir(paths.val_cache, "val_cache", fp, force=args.force, resumable=True)
     prepare_dir(paths.baseline_dir, "baseline", fp, force=args.force)
@@ -98,7 +102,7 @@ def main():
     print(f"Val images: {len(val_ids)}   cache: {paths.val_cache}")
 
     processor = None
-    conf_mat = np.zeros((EVAL_NUM_CLASSES, EVAL_NUM_CLASSES), dtype=np.int64)
+    conf_mat = new_confusion_matrix()
     class_samples = {}
     n_cached = n_new = 0
     skipped, errors = [], []
@@ -153,12 +157,13 @@ def main():
                               f"Prediction (SAM3, {args.arm} prompts)")
 
     if errors:
-        write_manifest(paths.baseline_dir, "baseline", fp, "in_progress", errors=errors)
+        write_manifest(paths.baseline_dir, "baseline", fp, "in_progress", errors=errors,
+                       metric_version=METRIC_VERSION)
         raise RuntimeError(f"{len(errors)} val images failed -- metrics above are INCOMPLETE; re-run to retry.")
     write_manifest(paths.baseline_dir, "baseline", fp, "complete", n_images=len(val_ids),
                    n_evaluated=n_new + n_cached, skipped=skipped, prompts=pc.as_dict(),
                    confidence_threshold=CONFIDENCE_THRESHOLD, coarse_thresholds=COARSE_THRESHOLDS,
-                   miou=miou)
+                   miou=miou, metric_version=METRIC_VERSION)
 
 
 if __name__ == "__main__":
