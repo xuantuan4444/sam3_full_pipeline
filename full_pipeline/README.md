@@ -14,7 +14,58 @@ Mỗi dataset nằm trong một thư mục riêng, tự chứa đủ mọi thứ
 | `voc/` | Pascal VOC 2012 | 6/20 | `python run_pipeline_voc.py` | [mục 6](#6-voc--pascal-voc-2012) |
 | `cityscapes/` | Cityscapes (19 lớp) | 14/19 | `python run_pipeline_cityscapes.py` | [mục 7](#7-cityscapes) |
 
-Thứ tự chạy dự kiến: chạy **PC59, nhánh LLM** trước. Sau khi có kết quả thì chạy **VOC** và **Cityscapes** (cả 2 nhánh).
+**Việc cần chạy bây giờ: xem [mục 0 – Đợt chạy 1](#0-đợt-chạy-1-việc-cần-chạy-trên-server).**
+
+---
+
+## 0. Đợt chạy 1: việc cần chạy trên server
+
+**Mục tiêu**
+- Chạy lại **nhánh nollm** của cả 3 dataset bằng `full_pipeline/`: batch 32, cùng code và cùng cách đo với nhánh llm đã chạy.
+- **Đánh giá lại nhánh llm của PC59** theo cách đo chuẩn (mục 5.5). Bước này **không train lại**.
+- Sinh **gói phân tích** `analysis_pack_<ds>.zip` cho mỗi dataset. Các bước phân tích tiếp theo làm offline bằng gói này, không cần GPU.
+
+**Chuẩn bị:** `git pull`. **Giữ nguyên** thư mục `outputs/` hiện có: các bước đã xong (baseline, mask thô, model llm) được dùng lại, không chạy lại.
+
+**Lệnh** (chạy tuần tự, nên chạy trong `tmux`):
+
+```bash
+cd full_pipeline/pc59
+python run_pipeline_pc59.py --dry-run     # kiểm tra kế hoạch: các dòng "[llm] train:..." phải là "skip (done)"
+python run_pipeline_pc59.py               # cả 2 nhánh
+
+cd ../voc
+python run_pipeline_voc.py --skip-llm --dry-run
+python run_pipeline_voc.py --skip-llm
+
+cd ../cityscapes
+python run_pipeline_cityscapes.py --skip-llm --dry-run
+python run_pipeline_cityscapes.py --skip-llm
+```
+
+**Những bước thực sự chạy**
+
+| Dataset | nollm | llm |
+|---|---|---|
+| PC59 | baseline: chỉ tính lại số từ cache (không chạy SAM3); train ×2; val ×2 | baseline: tính lại số từ cache; val ×2 chạy lại với cách đo chuẩn; **train được bỏ qua** |
+| VOC | chạy đủ: baseline (SAM3) → mask thô (SAM3) → train ×2 → val ×2 | không chạy |
+| Cityscapes | chạy đủ như VOC | không chạy |
+
+Lưu ý:
+- Nếu `--dry-run` của PC59 báo `RUN` ở dòng `[llm] train:...`, nghĩa là `TRAIN_PARAMS` trên server khác với repo, nên model llm sẽ bị train lại. Khi đó hãy dừng lại kiểm tra trước khi chạy.
+- Nếu job bị kill (ví dụ mã thoát `-9` do hết RAM), chạy lại **đúng lệnh cũ**: các bước đã xong sẽ được bỏ qua.
+
+**Kết quả cần gửi lại** (mỗi dataset một file, tự sinh ở cuối lần chạy):
+
+```
+full_pipeline/pc59/outputs/analysis_pack_pc59.zip               (nollm + llm)
+full_pipeline/voc/outputs/analysis_pack_voc.zip                 (nollm)
+full_pipeline/cityscapes/outputs/analysis_pack_cityscapes.zip   (nollm)
+```
+
+Dung lượng ước lượng: PC59 khoảng 50–150 MB, VOC và Cityscapes vài chục MB. Kèm thêm `outputs/logs/run_*.log` để đối chiếu.
+Nếu bước đóng gói lỗi (kết quả train/val không bị ảnh hưởng), chỉ cần chạy lại phần đóng gói, chỉ tốn CPU:
+`python run_pipeline_<ds>.py --export-only`.
 
 ---
 
@@ -157,6 +208,8 @@ python run_pipeline_<ds>.py [--skip-nollm | --skip-llm]
 | `--limit N` | smoke test trên N ảnh, ghi vào `outputs_smoke/` |
 | `--sam3-ckpt PATH` | checkpoint SAM3 nằm ngoài `weights/` |
 | `--table-only` | chỉ tạo lại `outputs/ablation_table.csv` |
+| `--export-only` | chỉ tạo lại gói phân tích `outputs/analysis_pack_<ds>.zip` từ kết quả đã có (CPU) |
+| `--no-export` | không tạo gói phân tích ở cuối lần chạy |
 
 Từng bước cũng chạy riêng được, ví dụ:
 
@@ -194,16 +247,16 @@ pc59/data/
 
 
 
-### 5.4 Chạy (nhánh no-LLM đã xong, chỉ chạy nhánh LLM)
+### 5.4 Chạy
 
 ```bash
 cd pc59
-python run_pipeline_pc59.py --skip-nollm --dry-run
-python run_pipeline_pc59.py --skip-nollm --limit 5
-python run_pipeline_pc59.py --skip-nollm
+python run_pipeline_pc59.py --dry-run      # kiểm tra kế hoạch
+python run_pipeline_pc59.py --limit 5      # (tùy chọn) smoke test -> outputs_smoke/
+python run_pipeline_pc59.py                # cả 2 nhánh (đợt chạy 1, xem mục 0)
 ```
 
-### 5.5 Quy ước metric (giữ nguyên như bản đã chạy)
+### 5.5 Quy ước metric
 
 - Nhãn eval: 0..58 là lớp, 255 là ignore. Pixel nền (raw 0) bị bỏ qua.
 - Pixel mà SAM3 không gán cho lớp nào (giá trị 255) được tính là **FN của lớp GT** (cột "không dự đoán" trong `confusion_matrix.npy`), giống cách đánh giá chuẩn của mmsegmentation. Phiên bản cách đo được ghi trong `manifest.json` (`metric_version` = 2); kết quả tính theo cách cũ (pixel này bị bỏ qua) sẽ tự được tính lại mà không cần chạy lại SAM3 hay train lại.
@@ -251,17 +304,15 @@ Lưu ý:
 | `contexts_class_voc.json` | ngữ cảnh viết tay |
 | `adjust_prompt_voc.json` | prompt LLM thật, ví dụ `tvmonitor -> monitor, computer screen` |
 
-### 6.3 Chạy (cả 2 nhánh, skip nollm để chạy llm)
+### 6.3 Chạy
 
 ```bash
 cd voc
-python run_pipeline_voc.py --dry-run
-python run_pipeline_voc.py --limit 5
-
-python run_pipeline_voc.py --skip-nollm
+python run_pipeline_voc.py --skip-llm --dry-run
+python run_pipeline_voc.py --skip-llm      # nhánh nollm (đợt chạy 1, xem mục 0)
 ```
 
-Muốn chạy từng nhánh riêng thì thêm `--skip-llm` hoặc `--skip-nollm`.
+Muốn chạy nhánh llm thì dùng `--skip-nollm`; muốn chạy cả hai thì bỏ cả hai cờ.
 
 ### 6.4 Quy ước metric và hyperparameter (giống notebook cũ)
 
@@ -317,15 +368,15 @@ mv <data_cityscapes>/gtFine_trainvaltest/gtFine           data/cityscapes/gtFine
 | `contexts_class_city.json` | ngữ cảnh viết tay |
 | `adjust_prompt_city.json` | prompt LLM thật (bản v3), ví dụ `person -> pedestrian, child ` |
 
-### 7.3 Chạy (cả 2 nhánh, skip nollm để chạy llm)
+### 7.3 Chạy
 
 ```bash
 cd cityscapes
-python run_pipeline_cityscapes.py --dry-run
-python run_pipeline_cityscapes.py --limit 5
-
-python run_pipeline_cityscapes.py --skip-nollm
+python run_pipeline_cityscapes.py --skip-llm --dry-run
+python run_pipeline_cityscapes.py --skip-llm      # nhánh nollm (đợt chạy 1, xem mục 0)
 ```
+
+Muốn chạy nhánh llm thì dùng `--skip-nollm`; muốn chạy cả hai thì bỏ cả hai cờ.
 
 
 
@@ -356,9 +407,11 @@ python run_pipeline_cityscapes.py --skip-nollm
 │   ├── class_pixel_stats.json, sample_coarse_masks.png
 │   ├── unetaspp/
 │   │   ├── checkpoint/           # best.pth, last.pth, history.json, training_curves.png
-│   │   └── val/                  # kết quả hybrid
+│   │   └── val/                  # kết quả hybrid; pred_local/ = dự đoán refine của từng ảnh (PNG)
 │   └── unetasppdinov2/           # tương tự
 ├── ablation_table.csv
+├── analysis_pack_<ds>/           # gói phân tích (xem dưới)
+├── analysis_pack_<ds>.zip        # <- file cần tải về
 └── logs/
 ```
 
@@ -368,7 +421,26 @@ Mỗi thư mục `baseline/` và `val/` gồm:
 - `per_class_metrics.csv`: IoU, Dice, GT Pixels, Pred Pixels của từng lớp. File val có thêm cột `Source` cho biết lớp đó lấy từ `SAM3 + <kiến trúc> (hybrid)` hay `SAM3 (baseline)`.
 - `per_class_iou_bar_chart.png`.
 - `class_visualizations/`: 2 ảnh mẫu cho mỗi lớp.
-- `manifest.json`: fingerprint, prompt đã dùng, số ảnh.
+- `confusion_matrix.npy`: ma trận [K, K+1] (dòng = GT, cột cuối = "không dự đoán").
+- `manifest.json`: fingerprint, prompt đã dùng, số ảnh, phiên bản cách đo.
+
+### Gói phân tích `analysis_pack_<ds>.zip`
+
+Gói này đủ để làm mọi phân tích tiếp theo trên một máy bất kỳ, **chỉ cần CPU**, không cần SAM3, GPU hay ảnh gốc:
+so sánh các tiêu chí chọn lớp, oracle / random-K, cách đo công bằng, chọn ảnh dương / ảnh âm khó cho lần train cuối.
+Gói được sinh bởi `tools/export_analysis_pack.py`; orchestrator tự gọi script này ở cuối mỗi lần chạy.
+
+```
+analysis_pack_<ds>/
+├── meta.json                       danh sách lớp, quy ước nhãn, lớp mục tiêu, ánh xạ lớp cục bộ của từng checkpoint
+├── val/<arm>/<id>.npz              mỗi ảnh val: gt, sam3_pred, local_unetaspp, local_unetasppdinov2 (uint8)
+├── train_gt_pixels.csv             mỗi ảnh train: split nội bộ + số pixel GT của từng lớp
+├── train_coarse_pixels_<arm>.csv   mỗi ảnh train: số pixel mask thô SAM3 của từng lớp mục tiêu
+└── results/                        CSV kết quả, confusion_matrix.npy, history.json, manifest, split.json, target_classes.json
+```
+
+Dự đoán hybrid của một ảnh dựng lại được từ gói: lấy `sam3_pred`, rồi ghi đè lớp mục tiêu `c`
+(chỉ số eval `meta.class_to_eval_index[c]`) ở những pixel có `local_<arch> == meta.arms.<arm>.archs.<arch>.target_to_local[c]`.
 
 `ablation_table.csv` có mỗi dòng là một cấu hình (baseline hoặc hybrid × nhánh × kiến trúc), với các cột PA, mIoU, mDice, mIoU_w, mIoU_s.
 

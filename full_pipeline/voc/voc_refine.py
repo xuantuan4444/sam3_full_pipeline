@@ -44,7 +44,7 @@ from voc_common import (
     image_path, is_complete, load_gt_eval, load_gt_train_raw, load_prompt_config,
     plot_bar_chart, plot_class_visualizations, prepare_dir, read_split, resolve_out_root,
     set_seed, setup_torch, split_hash, train_valid_mask, write_manifest,
-    METRIC_VERSION, metrics_current, new_confusion_matrix,
+    METRIC_VERSION, metrics_current, new_confusion_matrix, val_outputs_current,
 )
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -819,12 +819,12 @@ def val_main(arch):
             raise PipelineError(f"no finished training for {arch}/{args.arm}: {paths.ckpt_dir(arch)}")
 
     banner(f"HYBRID VAL SAM3 + {title} -- {DATASET_TITLE}, arm={args.arm}")
-    if is_complete(out_dir, fp) and metrics_current(out_dir) and not args.force:
+    if is_complete(out_dir, fp) and val_outputs_current(out_dir) and not args.force:
         print(f"[skip] already complete: {out_dir}")
         return
-    if is_complete(out_dir, fp) and not metrics_current(out_dir):
-        print(f"[metrics] {out_dir} was computed with an older evaluation protocol -> re-evaluating "
-              f"with v{METRIC_VERSION} (same checkpoint, no training)")
+    if is_complete(out_dir, fp) and not val_outputs_current(out_dir):
+        print(f"[val] {out_dir} is from an older version (evaluation protocol v{METRIC_VERSION} and/or "
+              f"per-image predictions missing) -> re-evaluating the same checkpoint, no training")
     if not is_complete(paths.val_cache, fps["baseline"]):
         raise PipelineError(f"val cache for arm '{args.arm}' is missing or outdated: {paths.val_cache}\n"
                             f"  run sam3_baseline_{DATASET}.py --arm {args.arm} first")
@@ -858,6 +858,11 @@ def val_main(arch):
     dino_model = load_dinov2(device) if dino else None
 
     val_ids = get_ids("val", args.limit)
+    # Per-image refine output (local ids 0..N, 0 = other) at the original resolution, PNG uint8.
+    # Together with val_cache's sam3_pred and the GT it allows any post-hoc analysis on CPU
+    # (tools/export_analysis_pack.py packages it).
+    pred_dir = out_dir / "pred_local"
+    pred_dir.mkdir(parents=True, exist_ok=True)
     conf_mat = new_confusion_matrix()
     class_samples = {}
     skipped, no_cache, errors = [], [], []
@@ -888,6 +893,7 @@ def val_main(arch):
                 logits = model(x, dinov2_features(dino_model, image, device)) if dino else model(x)
                 local_small = logits.argmax(dim=1).squeeze(0).byte().cpu().numpy()
                 local_pred = cv2.resize(local_small, (width, height), interpolation=cv2.INTER_NEAREST)
+                Image.fromarray(local_pred).save(pred_dir / f"{cache_key(img_id)}.png")
                 pred = sam3_pred.copy()
                 for lid, gidx in local_to_global.items():
                     pred[local_pred == lid] = gidx
@@ -910,6 +916,7 @@ def val_main(arch):
                               target_classes=targets, hybrid_tag=hybrid_label)
     if errors:
         raise RuntimeError(f"{len(errors)} images failed during hybrid val -- metrics are incomplete; re-run.")
-    write_manifest(out_dir, "val", fp, "complete", metric_version=METRIC_VERSION, arch=arch, checkpoint=str(ckpt_path),
+    write_manifest(out_dir, "val", fp, "complete", metric_version=METRIC_VERSION, saved_predictions=True,
+                   targets=targets, target_to_local=local, arch=arch, checkpoint=str(ckpt_path),
                    checkpoint_epoch=ckpt.get("epoch"), n_evaluated=len(val_ids) - len(skipped) - len(no_cache),
                    skipped=skipped, no_cache=no_cache, miou=miou)

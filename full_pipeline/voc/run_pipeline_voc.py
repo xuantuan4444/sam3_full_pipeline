@@ -9,7 +9,8 @@ Per arm (nollm, llm), in this order:
     4. train_unetasppdinov2_voc.py
     5. val_unetaspp_voc.py        (reads val_cache, no SAM3)
     6. val_unetasppdinov2_voc.py  (reads val_cache, no SAM3)
-then outputs/ablation_table.csv.
+then outputs/ablation_table.csv and outputs/analysis_pack_voc.zip (per-image predictions + stats
+for offline analysis on CPU, built by tools/export_analysis_pack.py; --export-only rebuilds it).
 
 Every step is skipped when its output is complete AND was built from the same target classes,
 prompts and settings (fingerprint in manifest.json). Interrupted? Re-run the same command.
@@ -165,7 +166,7 @@ def step_done(step, paths, fps):
     kind, arch = step.split(":")
     if kind == "train":
         return C.is_complete(paths.ckpt_dir(arch), fps[step]) and paths.best_ckpt(arch).exists()
-    return C.is_complete(paths.val_dir(arch), fps[step]) and C.metrics_current(paths.val_dir(arch))
+    return C.is_complete(paths.val_dir(arch), fps[step]) and C.val_outputs_current(paths.val_dir(arch))
 
 
 def build_plan(arms, archs, args, out_root):
@@ -220,6 +221,27 @@ def log_ablation_table(out_root):
     log(buf.getvalue())
 
 
+def run_export(out_root, args):
+    """Package per-image predictions + stats into outputs/analysis_pack_<ds>.zip (CPU only).
+    A failure here never invalidates the pipeline results; it can be re-run with --export-only."""
+    cmd = [sys.executable, "-u", str(C.ROOT / "tools" / "export_analysis_pack.py"), "--out-root", str(out_root)]
+    if args.limit:
+        cmd += ["--limit", str(args.limit)]
+    banner("EXPORT ANALYSIS PACK")
+    log("$ " + " ".join(cmd))
+    env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
+    proc = subprocess.Popen(cmd, cwd=str(C.ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
+    while True:
+        chunk = proc.stdout.read1(8192) if hasattr(proc.stdout, "read1") else proc.stdout.read(1)
+        if not chunk:
+            break
+        LOG.write_bytes(chunk)
+    rc = proc.wait()
+    if rc != 0:
+        log(f"[warn] export failed with code {rc}; results above are unaffected. Retry with --export-only.")
+    return rc
+
+
 def main():
     p = argparse.ArgumentParser(description=f"Full {C.DATASET_TITLE} pipeline (no-LLM + LLM arms).")
     p.add_argument("--skip-nollm", action="store_true", help="do not run the no-LLM arm")
@@ -233,6 +255,9 @@ def main():
     p.add_argument("--sam3-ckpt", default=None, help=f"default: {C.DEFAULT_SAM3_CKPT} or $SAM3_CKPT")
     p.add_argument("--out-root", default=None)
     p.add_argument("--table-only", action="store_true", help="only rebuild outputs/ablation_table.csv")
+    p.add_argument("--export-only", action="store_true",
+                   help="only (re)build outputs/analysis_pack_<ds>.zip from existing outputs (CPU)")
+    p.add_argument("--no-export", action="store_true", help="do not build the analysis pack at the end")
     args = p.parse_args()
 
     out_root = Path(args.out_root).resolve() if args.out_root else (C.SMOKE_OUT_ROOT if args.limit else C.DEFAULT_OUT_ROOT)
@@ -240,11 +265,15 @@ def main():
         C.write_ablation_table(out_root)
         return
 
+    global LOG
+    if args.export_only:
+        LOG = Tee(out_root / "logs" / f"export_{time.strftime('%Y%m%d-%H%M%S')}.log")
+        sys.exit(run_export(out_root, args))
+
     arms = [a for a in C.ARMS if not (a == "nollm" and args.skip_nollm) and not (a == "llm" and args.skip_llm)]
     if not arms:
         sys.exit("Both arms skipped -- nothing to do.")
 
-    global LOG
     LOG = Tee(out_root / "logs" / f"run_{time.strftime('%Y%m%d-%H%M%S')}.log")
     log(f"Log file: {LOG.path}")
     log(f"Arms: {arms}   Architectures: {args.archs}   Output root: {out_root}")
@@ -272,6 +301,8 @@ def main():
 
     banner(f"PIPELINE COMPLETE in {(time.time() - t0) / 60:.1f} min")
     log_ablation_table(out_root)
+    if not args.no_export:
+        run_export(out_root, args)
     log(f"\nFull log: {LOG.path}")
 
 

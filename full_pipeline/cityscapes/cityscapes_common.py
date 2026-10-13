@@ -628,6 +628,13 @@ def metrics_current(d):
     return bool(m) and m.get("metric_version") == METRIC_VERSION
 
 
+def val_outputs_current(d):
+    """A hybrid-val folder is up to date when its metrics use the current protocol AND it holds the
+    per-image refine predictions (pred_local/) that tools/export_analysis_pack.py packages."""
+    m = read_manifest(d)
+    return metrics_current(d) and bool(m.get("saved_predictions"))
+
+
 def compute_metrics(conf_mat, out_dir, title, target_classes=None, hybrid_label=None):
     """Writes summary_metrics.csv, per_class_metrics.csv and confusion_matrix.npy into out_dir.
     IoU = TP / (TP + FP + FN + eps), where FN includes GT pixels left without a valid prediction
